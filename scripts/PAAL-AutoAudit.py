@@ -39,9 +39,9 @@ for file in csv_files:
         for endpoint_name in df['Endpoint Name']:
             audit_data.append({'Endpoint Name': endpoint_name, 'Service': service_name})
 
-# Convert the list to a DataFrame, make entries upper case, remove duplicates and sort
+# Convert the list to a DataFrame, remove duplicates and sort
 audit_df = pd.DataFrame(audit_data)
-audit_df['Endpoint Name'] = audit_df['Endpoint Name'].str.upper()
+# audit_df['Endpoint Name'] = audit_df['Endpoint Name'].str.upper()  # This line is commented out to keep the original case
 audit_df.drop_duplicates(inplace=True)
 audit_df.sort_values(by=['Endpoint Name'], inplace=True)
 
@@ -80,12 +80,12 @@ addigy_df = pd.read_csv(addigy_file)
 
 # For each endpoint in ScreenConnect csv where "OS Name" is "Mac OS X"
 # if it's not in Addigy Devices csv, mark Addigy column in pivot_df as "✖"
-mac_endpoints = screenconnect_df[screenconnect_df['OS Name'] == 'Mac OS X']['Endpoint Name'].str.upper()
-missing_endpoints = mac_endpoints[~mac_endpoints.isin(addigy_df['Endpoint Name'].str.upper())]
+mac_endpoints = screenconnect_df[screenconnect_df['OS Name'] == 'Mac OS X']['Endpoint Name']
+missing_endpoints = mac_endpoints[~mac_endpoints.isin(addigy_df['Endpoint Name'])]
 pivot_df.loc[missing_endpoints, 'Addigy'] = '✖'
 
 # If "OS Name" is not "Mac OS X", leave the corresponding entry blank
-non_mac_endpoints = screenconnect_df[screenconnect_df['OS Name'] != 'Mac OS X']['Endpoint Name'].str.upper()
+non_mac_endpoints = screenconnect_df[screenconnect_df['OS Name'] != 'Mac OS X']['Endpoint Name']
 pivot_df.loc[non_mac_endpoints, 'Addigy'] = ''
 
 # Write the audit data to the audit file
