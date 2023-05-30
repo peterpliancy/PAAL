@@ -103,3 +103,8 @@ echo "Launching PAAL.py..."
 python3 "/Applications/PAAL/PAAL.py"
 
 echo "Installation and launch complete."
+
+# Remove the downloaded ZIP file
+echo "Removing downloaded ZIP file..."
+rm "$DOWNLOAD_DIR/PAAL-main.zip"
+echo "Downloaded ZIP file removed."

@@ -20,7 +20,7 @@ compliance_file = os.path.join(compliance_directory, "ComplianceAudit.csv")
 # Read the Audit.csv file and clone the "Endpoint Name" column
 with open(audit_file, 'r') as file:
     reader = csv.DictReader(file)
-    endpoint_names = [row["Endpoint Name"] for row in reader]
+    endpoint_names = [row.get("Endpoint Name".strip()) for row in reader]
 
 # Create the ComplianceAudit.csv file with initial data
 with open(compliance_file, 'w', newline='') as file:
@@ -52,7 +52,7 @@ with open(endpoint_file, 'r') as file:
 # Read the 365 AutoPilot file and get the "Serial number" column
 with open(autopilot_file, 'r') as file:
     reader = csv.DictReader(file)
-    autopilot_serials = {row["Serial number"] for row in reader}
+    autopilot_serials = {row.get("Serial number".strip()) for row in reader}
 
 # Read the ComplianceAudit.csv file, update the "Encryption Status", "Compliance Status", "AD Join Type", and "AutoPilot Status" based on the "Endpoint Name"
 with open(compliance_file, 'r') as file:
@@ -60,19 +60,19 @@ with open(compliance_file, 'r') as file:
     compliance_rows = list(reader)
 
 for row in compliance_rows:
-    endpoint_name = row["Endpoint Name"]
+    endpoint_name = row.get("Endpoint Name".strip())
     for filevault_entry in filevault_data:
-        if filevault_entry["Endpoint Name"] == endpoint_name and not row["Encryption Status"]:
-            row["Encryption Status"] = filevault_entry["Filevault Status"]
+        if filevault_entry.get("Endpoint Name".strip()) == endpoint_name and not row.get("Encryption Status".strip()):
+            row["Encryption Status"] = filevault_entry.get("Filevault Status".strip())
     for endpoint_entry in endpoint_data:
-        if endpoint_entry["Endpoint Name"] == endpoint_name:
-            if not row["Encryption Status"]:
-                row["Encryption Status"] = endpoint_entry["Encryption Status"]
-            if not row["Compliance Status"]:
-                row["Compliance Status"] = endpoint_entry["Compliance Status"]
-            if not row["AD Join Type"]:
-                row["AD Join Type"] = endpoint_entry["AD JoinType"]
-            if endpoint_entry["Serial number"] not in autopilot_serials:
+        if endpoint_entry.get("Endpoint Name".strip()) == endpoint_name:
+            if not row.get("Encryption Status".strip()):
+                row["Encryption Status"] = endpoint_entry.get("Encryption Status".strip())
+            if not row.get("Compliance Status".strip()):
+                row["Compliance Status"] = endpoint_entry.get("Compliance Status".strip())
+            if not row.get("AD Join Type".strip()):
+                row["AD Join Type"] = endpoint_entry.get("AD JoinType".strip())
+            if endpoint_entry.get("Serial number".strip()) not in autopilot_serials:
                 row["AutoPilot Status"] = "Not Enrolled"
 
 # Write updated rows back to the ComplianceAudit.csv file

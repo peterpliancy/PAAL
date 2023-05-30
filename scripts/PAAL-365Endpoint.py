@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+import ssl
+from urllib.request import urlopen
 from datetime import datetime
 
 def main():
@@ -63,8 +65,12 @@ def main():
     # Clone "OS Version" to a new column "OS Version OOD"
     df.insert(df.columns.get_loc('OS Version') + 1, 'OS Version OOD', df['OS Version'])
 
+    # Create unverified ssl context
+    ssl._create_default_https_context = ssl._create_unverified_context
+
     # Read latest version data from gist
-    latest_versions = pd.read_csv('https://gist.githubusercontent.com/peterpliancy/09d569bc5657afa40272d5d687c5366e/raw/latestversion.csv')
+    with urlopen('https://gist.githubusercontent.com/peterpliancy/09d569bc5657afa40272d5d687c5366e/raw/latestversion.csv') as response:
+        latest_versions = pd.read_csv(response)
 
     # Replace NaN values with an empty string in 'OS Version OOD'
     df['OS Version OOD'].fillna('', inplace=True)

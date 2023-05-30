@@ -20,7 +20,7 @@ sentinel_file = os.path.join(sentinel_directory, f"SentinelOne Sentinels (Full) 
 # Read the Audit.csv file and clone the "Endpoint Name" column
 with open(audit_file, 'r') as file:
     reader = csv.DictReader(file)
-    endpoint_names = [row["Endpoint Name"] for row in reader]
+    endpoint_names = [row.get("Endpoint Name".strip()) for row in reader]
 
 # Create the SoftwareAudit.csv file with initial data
 with open(software_audit_file, 'w', newline='') as file:
@@ -52,33 +52,33 @@ with open(software_audit_file, 'r') as file:
     software_audit_rows = list(reader)
 
 for row in software_audit_rows:
-    endpoint_name = row["Endpoint Name"].lower()
+    endpoint_name = row.get("Endpoint Name".strip())
     for addigy_entry in addigy_data:
-        if addigy_entry["Endpoint Name"].lower() == endpoint_name:
-            if addigy_entry["Device Type"].lower() != "mobile" or addigy_entry["Device Type"] == "Mobile":
-                if not row["Operating System"]:
-                    row["Operating System"] = addigy_entry["OS Version OOD"]
-                if not row["Free Disk Space (<20GB)"]:
-                    row["Free Disk Space (<20GB)"] = addigy_entry["Free Disk Space (<20GB)"]
+        if addigy_entry.get("Endpoint Name".strip()) == endpoint_name:
+            if addigy_entry.get("Device Type".strip()) != "mobile" or addigy_entry.get("Device Type".strip()) == "Mobile":
+                if not row.get("Operating System".strip()):
+                    row["Operating System"] = addigy_entry.get("OS Version OOD".strip())
+                if not row.get("Free Disk Space (<20GB)".strip()):
+                    row["Free Disk Space (<20GB)"] = addigy_entry.get("Free Disk Space (<20GB)".strip())
     for endpoint_entry in endpoint_data:
-        if endpoint_entry["Endpoint Name"].lower() == endpoint_name:
-            if not row["Operating System"]:
-                row["Operating System"] = endpoint_entry["OS Version OOD"]
-            if not row["Free Disk Space (<20GB)"]:
-                row["Free Disk Space (<20GB)"] = endpoint_entry["Free Disk Space (<20GB)"]
+        if endpoint_entry.get("Endpoint Name".strip()) == endpoint_name:
+            if not row.get("Operating System".strip()):
+                row["Operating System"] = endpoint_entry.get("OS Version OOD".strip())
+            if not row.get("Free Disk Space (<20GB)".strip()):
+                row["Free Disk Space (<20GB)"] = endpoint_entry.get("Free Disk Space (<20GB)".strip())
 
 # Read the SentinelOne Sentinels file and create a dictionary of "Endpoint Name" to "Agent Version"
 sentinel_data = {}
 with open(sentinel_file, 'r') as file:
     reader = csv.DictReader(file)
     for row in reader:
-        endpoint_name = row["Endpoint Name"]
-        agent_version = row["Agent Version"]
+        endpoint_name = row.get("Endpoint Name".strip())
+        agent_version = row.get("Agent Version".strip())
         sentinel_data[endpoint_name] = agent_version
 
 # Update the "Sentinel Agent Version" based on the "Endpoint Name"
 for row in software_audit_rows:
-    endpoint_name = row["Endpoint Name"]
+    endpoint_name = row.get("Endpoint Name".strip())
     if endpoint_name in sentinel_data:
         row["Sentinel Agent Version"] = sentinel_data[endpoint_name]
 
