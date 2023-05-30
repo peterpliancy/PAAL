@@ -77,22 +77,22 @@ pip3 install "${PYTHON_DEPS[@]}"
 
 # Download PAAL ZIP file
 echo "Downloading PAAL ZIP file..."
-curl -L -o /tmp/PAAL1.0-main.zip "https://github.com/peterpliancy/PAAL1.0/archive/refs/heads/main.zip"
+curl -L -o /tmp/PAAL-main.zip "https://github.com/peterpliancy/PAAL/archive/refs/heads/main.zip"
 echo "PAAL ZIP file downloaded successfully."
 
 # Unpack PAAL ZIP file
 echo "Unpacking PAAL ZIP file..."
-unzip -q "/tmp/PAAL1.0TK-main.zip" -d /tmp/
+unzip -q "/tmp/PAAL-main.zip" -d /tmp/
 echo "PAAL ZIP file unpacked successfully."
 
 # Rename and move PAAL to Applications folder
 echo "Renaming and moving PAAL to Applications folder..."
-mv -f "/tmp/PAAL1.0TK-main" "/tmp/PAAL 1.0"
-mv -f "/tmp/PAAL 1.0" "/Applications/PAAL 1.0"
+mv -f "/tmp/PAAL-main" "/tmp/PAAL"
+mv -f "/tmp/PAAL" "/Applications/PAAL"
 echo "PAAL has been renamed and moved to the Applications folder."
 
 # Run PAAL.py
 echo "Launching PAAL.py..."
-python3 "/Applications/PAAL 1.0/PAAL.py"
+python3 "/Applications/PAAL/PAAL.py"
 
 echo "Installation and launch complete."
