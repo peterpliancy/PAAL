@@ -49,10 +49,14 @@ with open(endpoint_file, 'r') as file:
     reader = csv.DictReader(file)
     endpoint_data = [row for row in reader]
 
-# Read the 365 AutoPilot file and get the "Serial number" column
-with open(autopilot_file, 'r') as file:
-    reader = csv.DictReader(file)
-    autopilot_serials = {row.get("Serial number".strip()) for row in reader}
+# Check if the autopilot_file exists before trying to open it
+if os.path.isfile(autopilot_file):
+    # Read the 365 AutoPilot file and get the "Serial number" column
+    with open(autopilot_file, 'r') as file:
+        reader = csv.DictReader(file)
+        autopilot_serials = {row.get("Serial number".strip()) for row in reader}
+else:
+    autopilot_serials = set()
 
 # Read the ComplianceAudit.csv file, update the "Encryption Status", "Compliance Status", "AD Join Type", and "AutoPilot Status" based on the "Endpoint Name"
 with open(compliance_file, 'r') as file:
