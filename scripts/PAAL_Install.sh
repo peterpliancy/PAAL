@@ -75,20 +75,27 @@ fi
 echo "Installing Python dependencies..."
 pip3 install "${PYTHON_DEPS[@]}"
 
+# Set the download and temporary directories
+DOWNLOAD_DIR="$HOME/Downloads"
+TEMP_DIR="$HOME/tmp"
+
+# Create the temporary directory if it doesn't exist
+mkdir -p "$TEMP_DIR"
+
 # Download PAAL ZIP file
 echo "Downloading PAAL ZIP file..."
-curl -L -o /tmp/PAAL-main.zip "https://github.com/peterpliancy/PAAL/archive/refs/heads/main.zip"
+curl -L -o "$DOWNLOAD_DIR/PAAL-main.zip" "https://github.com/peterpliancy/PAAL/archive/refs/heads/main.zip"
 echo "PAAL ZIP file downloaded successfully."
 
 # Unpack PAAL ZIP file
 echo "Unpacking PAAL ZIP file..."
-unzip -q "/tmp/PAAL-main.zip" -d /tmp/
+unzip -q "$DOWNLOAD_DIR/PAAL-main.zip" -d "$TEMP_DIR"
 echo "PAAL ZIP file unpacked successfully."
 
 # Rename and move PAAL to Applications folder
 echo "Renaming and moving PAAL to Applications folder..."
-mv -f "/tmp/PAAL-main" "/tmp/PAAL"
-mv -f "/tmp/PAAL" "/Applications/PAAL"
+mv -f "$TEMP_DIR/PAAL-main" "$TEMP_DIR/PAAL"
+mv -f "$TEMP_DIR/PAAL" "/Applications/PAAL"
 echo "PAAL has been renamed and moved to the Applications folder."
 
 # Run PAAL.py
