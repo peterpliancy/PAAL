@@ -1,112 +1,93 @@
 import os
 import csv
-from datetime import date
+import pandas as pd
+from datetime import datetime
 
-# Define the paths
-desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
-today = date.today().strftime("%m-%d-%Y")
-csv_path = os.path.join(desktop_path, "PAAL", "PAAL in Progress", f"{today} - Audit", "Audit.csv")
-new_csv_path = os.path.join(desktop_path, "PAAL", "PAAL in Progress", f"{today} - Audit", "AuditTime.csv")
-sentinel_csv_path = os.path.join(desktop_path, "PAAL", "PAAL in Progress", "SentinelOne Sentinels (Full)", f"SentinelOne Sentinels (Full) - Modified - {today}.csv")
-sentinel_apps_csv_path = os.path.join(desktop_path, "PAAL", "PAAL in Progress", "SentinelOne Applications", f"SentinelOne Applications - Modified - {today}.csv")
-screenconnect_csv_path = os.path.join(desktop_path, "PAAL", "PAAL in Progress", "ScreenConnect", f"ScreenConnect - Modified - {today}.csv")
-addigy_csv_path = os.path.join(desktop_path, "PAAL", "PAAL in Progress", "Addigy Devices", f"Addigy - Modified - {today}.csv")
-endpoint365_csv_path = os.path.join(desktop_path, "PAAL", "PAAL in Progress", "365 Endpoint", f"365 Endpoint - Modified - {today}.csv")
+# Define paths
+desktop = os.path.expanduser("~/Desktop")
+paal_folder = os.path.join(desktop, "PAAL")
+paal_in_progress_folder = os.path.join(paal_folder, "PAAL in Progress")
 
-# Read the existing CSV file and extract the "Endpoint Name" column
-data = []
-with open(csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        if endpoint_name is not None:
-            data.append({"Endpoint Name": endpoint_name})
+# Define audit file path
+today_date_folder = datetime.now().strftime("%m-%d-%Y") + " - Audit"
+today_date_folder_path = os.path.join(paal_in_progress_folder, today_date_folder)
+os.makedirs(today_date_folder_path, exist_ok=True)
+audit_file_name = "Audit.csv"
+audit_file_path = os.path.join(today_date_folder_path, audit_file_name)
 
-# Read the SentinelOne Sentinels CSV file and create a dictionary mapping endpoint names to last check-in dates
-sentinel_data = {}
-with open(sentinel_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_checkin is not None:
-            sentinel_data[endpoint_name] = last_checkin
+# Create a list to hold the audit data
+audit_data = []
 
-# Read the SentinelOne Applications CSV file and create a dictionary mapping endpoint names to last successful scan dates
-sentinel_apps_data = {}
-with open(sentinel_apps_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_successful_scan = row.get("Days Since Last Successful S1 Scan")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_successful_scan is not None:
-            sentinel_apps_data[endpoint_name] = last_successful_scan
+# List of csv file paths
+csv_files = [
+    os.path.join(paal_in_progress_folder, '365 AzureAD', f'365 AzureAD - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv'),
+    os.path.join(paal_in_progress_folder, '365 Endpoint', f'365 Endpoint - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv'),
+    os.path.join(paal_in_progress_folder, 'ScreenConnect', f'ScreenConnect - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv'),
+    os.path.join(paal_in_progress_folder, 'SentinelOne Sentinels (Full)', f'SentinelOne Sentinels (Full) - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv')
+]
 
-# Read the ScreenConnect CSV file and create a dictionary mapping endpoint names to last check-in dates
-screenconnect_data = {}
-with open(screenconnect_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_checkin is not None:
-            screenconnect_data[endpoint_name] = last_checkin
+# Process each csv file
+for file in csv_files:
+    # Get the service name from the file name
+    service_name = os.path.basename(os.path.dirname(file))
 
-# Read the SentinelOne Sentinels CSV file and create a dictionary mapping endpoint names to days since last reboot
-sentinel_reboot_data = {}
-with open(sentinel_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        days_since_reboot = row.get("Days Since Last Reboot")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and days_since_reboot is not None:
-            sentinel_reboot_data[endpoint_name] = days_since_reboot
+    df = pd.read_csv(file)
 
-# Read the Addigy Devices CSV file and create a dictionary mapping endpoint names to last check-in dates
-addigy_data = {}
-with open(addigy_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_checkin is not None:
-            addigy_data[endpoint_name] = last_checkin
+    # Check if 'Endpoint Name' is in the csv file
+    if 'Endpoint Name' in df.columns:
+        for endpoint_name in df['Endpoint Name']:
+            audit_data.append({'Endpoint Name': endpoint_name, 'Service': service_name})
 
-# Read the 365 Endpoint CSV file and create a dictionary mapping endpoint names to last check-in dates
-endpoint365_data = {}
-with open(endpoint365_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_checkin = row.get("Last check-in")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_checkin is not None:
-            endpoint365_data[endpoint_name] = last_checkin
+# Convert the list to a DataFrame, remove duplicates and sort
+audit_df = pd.DataFrame(audit_data)
+audit_df.drop_duplicates(inplace=True)
+audit_df.sort_values(by=['Endpoint Name'], inplace=True)
 
-# Write the extracted data to the new CSV file with the additional columns
-fieldnames = ["Endpoint Name", "Time Audit", "ScreenConnect: Days Since Last Check-in", "MDM: Days Since Last Check-in",
-              "SentinelOne: Days Since Last Check-in", "SentinelOne: Days Since Last Scan", "Days Since Last Reboot"]
-with open(new_csv_path, 'w', newline='') as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    writer.writeheader()
-    for row in data:
-        row["Time Audit"] = "████"
-        endpoint_name = row.get("Endpoint Name")
-        if endpoint_name is not None:
-            if endpoint_name in sentinel_data:
-                row["SentinelOne: Days Since Last Check-in"] = sentinel_data[endpoint_name]
-            if endpoint_name in sentinel_apps_data:
-                row["SentinelOne: Days Since Last Scan"] = sentinel_apps_data[endpoint_name]
-            if endpoint_name in screenconnect_data:
-                row["ScreenConnect: Days Since Last Check-in"] = screenconnect_data[endpoint_name]
-            if endpoint_name in sentinel_reboot_data:
-                row["Days Since Last Reboot"] = sentinel_reboot_data[endpoint_name]
-            if endpoint_name in addigy_data:
-                row["MDM: Days Since Last Check-in"] = addigy_data[endpoint_name]
-            if endpoint_name in endpoint365_data:
-                row["MDM: Days Since Last Check-in"] = endpoint365_data[endpoint_name]
-            writer.writerow(row)
+# Pivot the DataFrame to have a column for each service, with check marks for the endpoint names that appear in each service
+pivot_df = audit_df.pivot_table(index='Endpoint Name', columns='Service', aggfunc=len, fill_value='✖')
+pivot_df.replace(1, '✔', inplace=True)
 
-print("AuditTime.csv file created successfully.")
+# Check for endpoints that appear in 365 Endpoint or 365 AzureAD
+if '365 Endpoint' in pivot_df.columns:
+    endpoint_endpoints = pivot_df[pivot_df['365 Endpoint'] == '✔'].index
+if '365 AzureAD' in pivot_df.columns:
+    azuread_endpoints = pivot_df[pivot_df['365 AzureAD'] == '✔'].index
+
+# Rename the specified columns
+pivot_df.rename(columns={"SentinelOne Sentinels (Full)": "SentinelOne"}, inplace=True)
+
+# Create a blank Addigy column
+pivot_df.insert(2, 'Addigy', '')
+
+# Load Addigy Devices csv
+addigy_file = os.path.join(paal_in_progress_folder, 'Addigy Devices', f'Addigy - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv')
+addigy_df = pd.read_csv(addigy_file)
+
+# If 'Endpoint Name' in Addigy Devices csv, mark Addigy column in pivot_df as '✔'
+addigy_endpoints = addigy_df['Endpoint Name']
+for endpoint in addigy_endpoints:
+    if endpoint in pivot_df.index:
+        pivot_df.loc[endpoint, 'Addigy'] = '✔'
+
+# Load SentinelOne Sentinels csv
+sentinel_file = os.path.join(paal_in_progress_folder, 'SentinelOne Sentinels (Full)', f'SentinelOne Sentinels (Full) - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv')
+sentinel_df = pd.read_csv(sentinel_file)
+
+# If 'OS' column contains 'macOS' and there's not a '✔' in Addigy column, mark it as '✖'
+mac_endpoints = sentinel_df[sentinel_df['OS'].str.contains('macOS', na=False)]['Endpoint Name']
+for endpoint in mac_endpoints:
+    if endpoint in pivot_df.index and pivot_df.loc[endpoint, 'Addigy'] != '✔':
+        pivot_df.loc[endpoint, 'Addigy'] = '✖'
+
+# Load ScreenConnect csv
+screenconnect_file = os.path.join(paal_in_progress_folder, 'ScreenConnect', f'ScreenConnect - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv')
+screenconnect_df = pd.read_csv(screenconnect_file)
+
+# If 'OS Name' is 'Mac OS X' and Addigy column is blank, mark it as '✖'
+mac_endpoints = screenconnect_df[screenconnect_df['OS Name'] == 'Mac OS X']['Endpoint Name']
+for endpoint in mac_endpoints:
+    if endpoint in pivot_df.index and pivot_df.loc[endpoint, 'Addigy'] == '':
+        pivot_df.loc[endpoint, 'Addigy'] = '✖'
+
+# Write the audit data to the audit file
+pivot_df.to_csv(audit_file_path)
