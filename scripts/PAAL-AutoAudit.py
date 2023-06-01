@@ -56,38 +56,38 @@ if '365 AzureAD' in pivot_df.columns:
 # Rename the specified columns
 pivot_df.rename(columns={"SentinelOne Sentinels (Full)": "SentinelOne"}, inplace=True)
 
-# Create a blank Addigy column
-pivot_df.insert(2, 'Addigy', '')
-
-# Load Addigy Devices csv
+# Load Addigy Devices csv if it exists
 addigy_file = os.path.join(paal_in_progress_folder, 'Addigy Devices', f'Addigy - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv')
-addigy_df = pd.read_csv(addigy_file)
+if os.path.isfile(addigy_file):
+    # Create a blank Addigy column
+    pivot_df.insert(2, 'Addigy', '')
+    addigy_df = pd.read_csv(addigy_file)
 
-# If 'Endpoint Name' in Addigy Devices csv, mark Addigy column in pivot_df as '✔'
-addigy_endpoints = addigy_df['Endpoint Name']
-for endpoint in addigy_endpoints:
-    if endpoint in pivot_df.index:
-        pivot_df.loc[endpoint, 'Addigy'] = '✔'
+    # If 'Endpoint Name' in Addigy Devices csv, mark Addigy column in pivot_df as '✔'
+    addigy_endpoints = addigy_df['Endpoint Name']
+    for endpoint in addigy_endpoints:
+        if endpoint in pivot_df.index:
+            pivot_df.loc[endpoint, 'Addigy'] = '✔'
 
-# Load SentinelOne Sentinels csv
-sentinel_file = os.path.join(paal_in_progress_folder, 'SentinelOne Sentinels (Full)', f'SentinelOne Sentinels (Full) - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv')
-sentinel_df = pd.read_csv(sentinel_file)
+    # Load SentinelOne Sentinels csv
+    sentinel_file = os.path.join(paal_in_progress_folder, 'SentinelOne Sentinels (Full)', f'SentinelOne Sentinels (Full) - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv')
+    sentinel_df = pd.read_csv(sentinel_file)
 
-# If 'OS' column contains 'macOS' and there's not a '✔' in Addigy column, mark it as '✖'
-mac_endpoints = sentinel_df[sentinel_df['OS'].str.contains('macOS', na=False)]['Endpoint Name']
-for endpoint in mac_endpoints:
-    if endpoint in pivot_df.index and pivot_df.loc[endpoint, 'Addigy'] != '✔':
-        pivot_df.loc[endpoint, 'Addigy'] = '✖'
+    # If 'OS' column contains 'macOS' and there's not a '✔' in Addigy column, mark it as '✖'
+    mac_endpoints = sentinel_df[sentinel_df['OS'].str.contains('macOS', na=False)]['Endpoint Name']
+    for endpoint in mac_endpoints:
+        if endpoint in pivot_df.index and pivot_df.loc[endpoint, 'Addigy'] != '✔':
+            pivot_df.loc[endpoint, 'Addigy'] = '✖'
 
-# Load ScreenConnect csv
-screenconnect_file = os.path.join(paal_in_progress_folder, 'ScreenConnect', f'ScreenConnect - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv')
-screenconnect_df = pd.read_csv(screenconnect_file)
+    # Load ScreenConnect csv
+    screenconnect_file = os.path.join(paal_in_progress_folder, 'ScreenConnect', f'ScreenConnect - Modified - {datetime.now().strftime("%m-%d-%Y")}.csv')
+    screenconnect_df = pd.read_csv(screenconnect_file)
 
-# If 'OS Name' is 'Mac OS X' and Addigy column is blank, mark it as '✖'
-mac_endpoints = screenconnect_df[screenconnect_df['OS Name'] == 'Mac OS X']['Endpoint Name']
-for endpoint in mac_endpoints:
-    if endpoint in pivot_df.index and pivot_df.loc[endpoint, 'Addigy'] == '':
-        pivot_df.loc[endpoint, 'Addigy'] = '✖'
+    # If 'OS Name' is 'Mac OS X' and Addigy column is blank, mark it as '✖'
+    mac_endpoints = screenconnect_df[screenconnect_df['OS Name'] == 'Mac OS X']['Endpoint Name']
+    for endpoint in mac_endpoints:
+        if endpoint in pivot_df.index and pivot_df.loc[endpoint, 'Addigy'] == '':
+            pivot_df.loc[endpoint, 'Addigy'] = '✖'
 
 # Write the audit data to the audit file
 pivot_df.to_csv(audit_file_path)
