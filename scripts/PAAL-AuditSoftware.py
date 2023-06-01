@@ -39,9 +39,14 @@ with open(software_audit_file, 'w', newline='') as file:
         })
 
 # Read the Addigy and 365 Endpoint files and create lists of dictionaries
-with open(addigy_file, 'r') as file:
-    reader = csv.DictReader(file)
-    addigy_data = [row for row in reader]
+addigy_data = []
+try:
+    with open(addigy_file, 'r') as file:
+        reader = csv.DictReader(file)
+        addigy_data = [row for row in reader]
+except FileNotFoundError:
+    print("Addigy file not found, skipping...")
+
 with open(endpoint_file, 'r') as file:
     reader = csv.DictReader(file)
     endpoint_data = [row for row in reader]
