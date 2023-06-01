@@ -20,7 +20,7 @@ def main():
     df.to_csv(new_file_path, index=False)
 
     # Edit the new file, keep only the specified columns
-    keep_columns = ["Device name", "Last check-in", "OS version", "Serial number",
+    keep_columns = ["Device name", "Last check-in", "OS", "OS version", "Serial number",
                     "Free storage", "Compliance", "Encrypted", "JoinType"]
 
     df = pd.read_csv(new_file_path)
