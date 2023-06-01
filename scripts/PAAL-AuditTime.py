@@ -20,70 +20,75 @@ with open(csv_path, 'r') as csvfile:
     for row in reader:
         endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
         if endpoint_name is not None:
-            data.append({"Endpoint Name": endpoint_name})
+            data.append({"Endpoint Name": endpoint_name, "Time Audit": "████"})
 
-# Read the SentinelOne Sentinels CSV file and create a dictionary mapping endpoint names to last check-in dates
+# Rest of the code...
+
 sentinel_data = {}
-with open(sentinel_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_checkin is not None:
-            sentinel_data[endpoint_name] = last_checkin
-
-# Read the SentinelOne Applications CSV file and create a dictionary mapping endpoint names to last successful scan dates
-sentinel_apps_data = {}
-with open(sentinel_apps_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_successful_scan = row.get("Days Since Last Successful S1 Scan")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_successful_scan is not None:
-            sentinel_apps_data[endpoint_name] = last_successful_scan
-
-# Read the ScreenConnect CSV file and create a dictionary mapping endpoint names to last check-in dates
-screenconnect_data = {}
-with open(screenconnect_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_checkin is not None:
-            screenconnect_data[endpoint_name] = last_checkin
-
-# Read the SentinelOne Sentinels CSV file and create a dictionary mapping endpoint names to days since last reboot
 sentinel_reboot_data = {}
-with open(sentinel_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        days_since_reboot = row.get("Days Since Last Reboot")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and days_since_reboot is not None:
-            sentinel_reboot_data[endpoint_name] = days_since_reboot
-
-# Read the Addigy Devices CSV file and create a dictionary mapping endpoint names to last check-in dates
+screenconnect_data = {}
+screenconnect_reboot_data = {}
+sentinel_apps_data = {}
 addigy_data = {}
-with open(addigy_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_checkin is not None:
-            addigy_data[endpoint_name] = last_checkin
-
-# Read the 365 Endpoint CSV file and create a dictionary mapping endpoint names to last check-in dates
 endpoint365_data = {}
-with open(endpoint365_csv_path, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
-        last_checkin = row.get("Last check-in")  # Use get() to avoid KeyError if the column doesn't exist
-        if endpoint_name is not None and last_checkin is not None:
-            endpoint365_data[endpoint_name] = last_checkin
+
+# Check if sentinel csv file exists
+if os.path.isfile(sentinel_csv_path):
+    with open(sentinel_csv_path, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
+            endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
+            last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
+            days_since_reboot = row.get("Days Since Last Reboot")  # Use get() to avoid KeyError if the column doesn't exist
+            if endpoint_name is not None and last_checkin is not None:
+                sentinel_data[endpoint_name] = last_checkin
+            if endpoint_name is not None and days_since_reboot is not None:
+                sentinel_reboot_data[endpoint_name] = days_since_reboot
+
+# Check if sentinel apps csv file exists
+if os.path.isfile(sentinel_apps_csv_path):
+    with open(sentinel_apps_csv_path, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
+            endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
+            last_successful_scan = row.get("Days Since Last Successful S1 Scan")  # Use get() to avoid KeyError if the column doesn't exist
+            if endpoint_name is not None and last_successful_scan is not None:
+                sentinel_apps_data[endpoint_name] = last_successful_scan
+
+# Check if screenconnect csv file exists
+if os.path.isfile(screenconnect_csv_path):
+    with open(screenconnect_csv_path, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
+            last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
+            days_since_reboot = row.get("Days Since Last Reboot")  # Use get() to avoid KeyError if the column doesn't exist
+            if endpoint_name is not None and last_checkin is not None:
+                screenconnect_data[endpoint_name] = last_checkin
+            if endpoint_name is not None and days_since_reboot is not None:
+                screenconnect_reboot_data[endpoint_name] = days_since_reboot
+
+# Check if addigy csv file exists
+if os.path.isfile(addigy_csv_path):
+    with open(addigy_csv_path, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
+            last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
+            if endpoint_name is not None and last_checkin is not None:
+                addigy_data[endpoint_name] = last_checkin
+
+# Check if endpoint365 csv file exists
+if os.path.isfile(endpoint365_csv_path):
+    with open(endpoint365_csv_path, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
+            last_checkin = row.get("Last check-in")  # Use get() to avoid KeyError if the column doesn't exist
+            if endpoint_name is not None and last_checkin is not None:
+                endpoint365_data[endpoint_name] = last_checkin
 
 # Write the extracted data to the new CSV file with the additional columns
 fieldnames = ["Endpoint Name", "Time Audit", "ScreenConnect: Days Since Last Check-in", "MDM: Days Since Last Check-in",
@@ -92,7 +97,6 @@ with open(new_csv_path, 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
     for row in data:
-        row["Time Audit"] = "████"
         endpoint_name = row.get("Endpoint Name")
         if endpoint_name is not None:
             if endpoint_name in sentinel_data:
@@ -101,12 +105,17 @@ with open(new_csv_path, 'w', newline='') as csvfile:
                 row["SentinelOne: Days Since Last Scan"] = sentinel_apps_data[endpoint_name]
             if endpoint_name in screenconnect_data:
                 row["ScreenConnect: Days Since Last Check-in"] = screenconnect_data[endpoint_name]
-            if endpoint_name in sentinel_reboot_data:
-                row["Days Since Last Reboot"] = sentinel_reboot_data[endpoint_name]
             if endpoint_name in addigy_data:
                 row["MDM: Days Since Last Check-in"] = addigy_data[endpoint_name]
             if endpoint_name in endpoint365_data:
                 row["MDM: Days Since Last Check-in"] = endpoint365_data[endpoint_name]
+            if endpoint_name in sentinel_reboot_data and endpoint_name in screenconnect_reboot_data:
+                if sentinel_reboot_data[endpoint_name] != screenconnect_reboot_data[endpoint_name]:
+                    row["Days Since Last Reboot"] = f"{sentinel_reboot_data[endpoint_name]} or {screenconnect_reboot_data[endpoint_name]}"
+                else:
+                    row["Days Since Last Reboot"] = sentinel_reboot_data[endpoint_name]
+            elif endpoint_name in sentinel_reboot_data:
+                row["Days Since Last Reboot"] = sentinel_reboot_data[endpoint_name]
+            elif endpoint_name in screenconnect_reboot_data:
+                row["Days Since Last Reboot"] = screenconnect_reboot_data[endpoint_name]
             writer.writerow(row)
-
-print("AuditTime.csv file created successfully.")
