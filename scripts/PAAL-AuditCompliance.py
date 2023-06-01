@@ -39,10 +39,13 @@ with open(compliance_file, 'w', newline='') as file:
             "AutoPilot Status": ""
         })
 
-# Read the Addigy file and create a list of dictionaries
-with open(addigy_file, 'r') as file:
-    reader = csv.DictReader(file)
-    filevault_data = [row for row in reader]
+# Read the Addigy file and create a list of dictionaries if it exists
+if os.path.isfile(addigy_file):
+    with open(addigy_file, 'r') as file:
+        reader = csv.DictReader(file)
+        filevault_data = [row for row in reader]
+else:
+    filevault_data = []
 
 # Read the 365 Endpoint file and create a list of dictionaries
 with open(endpoint_file, 'r') as file:
