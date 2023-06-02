@@ -8,7 +8,7 @@ from io import StringIO
 def copy_file(source_file, destination_folder, new_filename):
     shutil.copy2(source_file, os.path.join(destination_folder, new_filename))
 
-def modify_csv_file(file_path):
+def modify_csv_file(file_path, remote_data):
     df = pd.read_csv(file_path)
 
     columns_to_remove = [
@@ -31,6 +31,31 @@ def modify_csv_file(file_path):
     df.loc[df['isManaged'] == True, 'isManaged'] = ''
 
     df.loc[df['isCompliant'] == False, 'isCompliant'] = 'Not Compliant'
+
+    # Rename entries from "MacMDM" to "macOS" in the "operatingSystem" column
+    df.loc[df['operatingSystem'] == 'MacMDM', 'operatingSystem'] = 'macOS'
+
+    # Rename columns
+    df.rename(columns={'isCompliant': 'Compliance Status', 'joinType (trustType)': 'AD Join Type', 'isManaged': 'Managed Status'}, inplace=True)
+
+    # Rename the "operatingSystem" column to "OS"
+    df.rename(columns={'operatingSystem': 'OS'}, inplace=True)
+
+    # Create a new column "OS Version OOD" and clone the values from "operatingSystemVersion"
+    df.insert(df.columns.get_loc('operatingSystemVersion') + 1, 'OS Version OOD', df['operatingSystemVersion'])
+
+    # Clear "OS Version OOD" if it starts with a value from the OSCombined column
+    df['OS Version OOD'] = df['OS Version OOD'].astype(str)
+    remote_data['OSCombined'] = remote_data['OSCombined'].astype(str)
+
+    df['OS Version OOD'] = df.apply(
+        lambda row: '' if any(row['OS Version OOD'].startswith(version) for version in remote_data['OSCombined']) else row['OS Version OOD'],
+        axis=1
+    )
+
+    # Sort the displayName column alphabetically, ignoring case
+    df['displayName'] = df['displayName'].astype(str)
+    df.sort_values(by='displayName', key=lambda x: x.str.lower(), inplace=True)
 
     return df
 
@@ -70,41 +95,16 @@ def main():
         remote_data = fetch_remote_csv_data(gist_url)
 
         # Modify the modified file
-        modified_df = modify_csv_file(modified_file_path)
-
-        # Clear operatingSystemVersion if it starts with a value from the Windows column
-        modified_df['operatingSystemVersion'] = modified_df['operatingSystemVersion'].astype(str)
-        remote_data['Windows'] = remote_data['Windows'].astype(str)
-
-        modified_df['operatingSystemVersion'] = modified_df.apply(
-            lambda row: '' if any(str(row['operatingSystemVersion']).startswith(windows) for windows in remote_data['Windows']) else row['operatingSystemVersion'],
-            axis=1
-        )
-
-        # Sort the displayName column alphabetically, ignoring case
-        modified_df['displayName'] = modified_df['displayName'].astype(str)
-        modified_df.sort_values(by='displayName', key=lambda x: x.str.lower(), inplace=True)
-
-        # Change "False" entries in the isCompliant column to "Not Compliant"
-        modified_df.loc[modified_df['isCompliant'] == False, 'isCompliant'] = 'Not Compliant'
+        modified_df = modify_csv_file(modified_file_path, remote_data)
 
         # Rename columns
-        modified_df.rename(columns={
-            'displayName': 'Endpoint Name',
-            'operatingSystem': 'OS',
-            'operatingSystemVersion': 'OS Version',
-            'joinType (trustType)': 'AD JoinType',
-            'isCompliant': 'Compliance Status',
-            'isManaged': 'Managed Status'
-        }, inplace=True)
-
-        # Remove matches to 'Azure AD joined' in the 'AD JoinType' column
-        modified_df.loc[modified_df['AD JoinType'] == 'Azure AD joined', 'AD JoinType'] = ''
+        modified_df.rename(columns={'isCompliant': 'Compliance Status', 'joinType (trustType)': 'AD Join Type', 'isManaged': 'Managed Status'}, inplace=True)
+        modified_df.rename(columns={'operatingSystem': 'OS', 'operatingSystemVersion': 'OS Version'}, inplace=True)
 
         # Save the modified file
         save_csv_file(modified_df, modified_file_path)
 
-        print("CSV file processing completed.")
+        print("365 AzureAD CSV Created Successfully!")
     else:
         print(f"Source file does not exist: {source_file}")
 
