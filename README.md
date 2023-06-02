@@ -9,7 +9,9 @@ python3 /Applications/PAAL/PAAL.py
 
 Current Version 1.0.3
 - removed the newly added type column from the outputted modified file sentinelone apps csv
-- changed the success message at the end to start the process of cleaning those up.
+- changed the success message at the end to start the process of cleaning those up
+- changed the endpoint script to compare the gist to the OSCombined column instead of the Windows one to better support mixed platform
+- changed output of the endpoint script to be in line with the S1 Apps scripts.
 
 Version 1.0.2
 - modified the scripts so that they no longer required an addigy file to be present. It was not built in mind with clients who used 365 to MDM both platofrms
