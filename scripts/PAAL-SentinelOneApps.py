@@ -43,7 +43,8 @@ columns_to_remove = [
     "Last Scan Result",
     "Application",
     "Days From CVE Detection",
-    "Last Successful Scan"
+    "Last Successful Scan",
+    "Type"  # Add the "Type" column to be removed
 ]
 
 with open(destination_path, "r", newline="") as file:
@@ -107,4 +108,4 @@ with open(destination_path, "w", newline="") as file:
     writer.writeheader()
     writer.writerows(modified_rows)
 
-print("Changes applied successfully!")
+print("SentinelOne Apps CSV Created Successfully!")
