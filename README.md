@@ -12,6 +12,9 @@ Current Version 1.0.3
 - changed the success message at the end to start the process of cleaning those up
 - changed the endpoint script to compare the gist to the OSCombined column instead of the Windows one to better support mixed platform
 - changed output of the endpoint script to be in line with the S1 Apps scripts.
+- modified the AzureAD script to have the new success message
+- modified the AzureAD script to include the original OS column
+- renamed macOS devices in the OS column in the AzureAD script
 
 Version 1.0.2
 - modified the scripts so that they no longer required an addigy file to be present. It was not built in mind with clients who used 365 to MDM both platofrms
