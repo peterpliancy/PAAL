@@ -75,11 +75,12 @@ def main():
     # Replace NaN values with an empty string in 'OS Version OOD'
     df['OS Version OOD'].fillna('', inplace=True)
 
-    # Remove all entries in "OS Version OOD" that start with what is found in the gist in the "Windows" column.
-    for version in latest_versions['Windows']:
-        df.loc[df['OS Version OOD'].str.startswith(str(version)), 'OS Version OOD'] = ''
+    # Remove all entries in "OS Version OOD" that start with any value found in the "OSCombined" column of the latest versions DataFrame
+    df['OS Version OOD'] = df['OS Version OOD'].apply(lambda x: '' if any(x.startswith(version) for version in latest_versions['OSCombined']) else x)
 
     df.to_csv(new_file_path, index=False)
+
+    print("365 Endpoint CSV Created Successfully!")
 
 if __name__ == "__main__":
     main()
