@@ -7,8 +7,12 @@ The command to run this in terminal assuming it has ran successfully in the past
 python3 /Applications/PAAL/PAAL.py
 
 
-Current Version 1.0.2
-- modified the scripts so that they no longer required an addigy file to be present. It was not built in mind with clients who used 365 to MDM both platofrms.
+Current Version 1.0.3
+- removed the newly added type column from the outputted modified file sentinelone apps csv
+- changed the success message at the end to start the process of cleaning those up.
+
+Version 1.0.2
+- modified the scripts so that they no longer required an addigy file to be present. It was not built in mind with clients who used 365 to MDM both platofrms
 
 Version 1.0.1
 - reworked autoaudit.py to better handle mac devices
