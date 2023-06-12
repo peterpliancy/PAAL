@@ -22,8 +22,6 @@ with open(csv_path, 'r') as csvfile:
         if endpoint_name is not None:
             data.append({"Endpoint Name": endpoint_name, "Time Audit": "████"})
 
-# Rest of the code...
-
 sentinel_data = {}
 sentinel_reboot_data = {}
 screenconnect_data = {}
@@ -43,8 +41,8 @@ if os.path.isfile(sentinel_csv_path):
             days_since_reboot = row.get("Days Since Last Reboot")  # Use get() to avoid KeyError if the column doesn't exist
             if endpoint_name is not None and last_checkin is not None:
                 sentinel_data[endpoint_name] = last_checkin
-            if endpoint_name is not None and days_since_reboot is not None:
-                sentinel_reboot_data[endpoint_name] = days_since_reboot
+            if endpoint_name is not None and days_since_reboot is not None and days_since_reboot != '':
+                sentinel_reboot_data[endpoint_name] = int(days_since_reboot)
 
 # Check if sentinel apps csv file exists
 if os.path.isfile(sentinel_apps_csv_path):
@@ -62,19 +60,21 @@ if os.path.isfile(screenconnect_csv_path):
     with open(screenconnect_csv_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
             endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
             last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
             days_since_reboot = row.get("Days Since Last Reboot")  # Use get() to avoid KeyError if the column doesn't exist
             if endpoint_name is not None and last_checkin is not None:
                 screenconnect_data[endpoint_name] = last_checkin
-            if endpoint_name is not None and days_since_reboot is not None:
-                screenconnect_reboot_data[endpoint_name] = days_since_reboot
+            if endpoint_name is not None and days_since_reboot is not None and days_since_reboot != '':
+                screenconnect_reboot_data[endpoint_name] = int(days_since_reboot)
 
 # Check if addigy csv file exists
 if os.path.isfile(addigy_csv_path):
     with open(addigy_csv_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
             endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
             last_checkin = row.get("Last Check-in")  # Use get() to avoid KeyError if the column doesn't exist
             if endpoint_name is not None and last_checkin is not None:
@@ -85,14 +85,23 @@ if os.path.isfile(endpoint365_csv_path):
     with open(endpoint365_csv_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            row = {k.strip(): v for k, v in row.items()}  # Strip spaces from column names
             endpoint_name = row.get("Endpoint Name".strip())  # Strip whitespaces from column name
             last_checkin = row.get("Last check-in")  # Use get() to avoid KeyError if the column doesn't exist
             if endpoint_name is not None and last_checkin is not None:
                 endpoint365_data[endpoint_name] = last_checkin
 
 # Write the extracted data to the new CSV file with the additional columns
-fieldnames = ["Endpoint Name", "Time Audit", "ScreenConnect: Days Since Last Check-in", "MDM: Days Since Last Check-in",
-              "SentinelOne: Days Since Last Check-in", "SentinelOne: Days Since Last Scan", "Days Since Last Reboot"]
+fieldnames = [
+    "Endpoint Name",
+    "Time Audit",
+    "ScreenConnect: Days Since Last Check-in",
+    "MDM: Days Since Last Check-in",
+    "SentinelOne: Days Since Last Check-in",
+    "SentinelOne: Days Since Last Scan",
+    "Days Since Last Reboot"
+]
+
 with open(new_csv_path, 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
@@ -101,21 +110,22 @@ with open(new_csv_path, 'w', newline='') as csvfile:
         if endpoint_name is not None:
             if endpoint_name in sentinel_data:
                 row["SentinelOne: Days Since Last Check-in"] = sentinel_data[endpoint_name]
-            if endpoint_name in sentinel_apps_data:
-                row["SentinelOne: Days Since Last Scan"] = sentinel_apps_data[endpoint_name]
+                row["SentinelOne: Days Since Last Scan"] = sentinel_apps_data.get(endpoint_name, '')
             if endpoint_name in screenconnect_data:
                 row["ScreenConnect: Days Since Last Check-in"] = screenconnect_data[endpoint_name]
             if endpoint_name in addigy_data:
                 row["MDM: Days Since Last Check-in"] = addigy_data[endpoint_name]
             if endpoint_name in endpoint365_data:
                 row["MDM: Days Since Last Check-in"] = endpoint365_data[endpoint_name]
-            if endpoint_name in sentinel_reboot_data and endpoint_name in screenconnect_reboot_data:
-                if sentinel_reboot_data[endpoint_name] != screenconnect_reboot_data[endpoint_name]:
-                    row["Days Since Last Reboot"] = f"{sentinel_reboot_data[endpoint_name]} or {screenconnect_reboot_data[endpoint_name]}"
-                else:
-                    row["Days Since Last Reboot"] = sentinel_reboot_data[endpoint_name]
-            elif endpoint_name in sentinel_reboot_data:
-                row["Days Since Last Reboot"] = sentinel_reboot_data[endpoint_name]
-            elif endpoint_name in screenconnect_reboot_data:
-                row["Days Since Last Reboot"] = screenconnect_reboot_data[endpoint_name]
+            
+            sentinel_reboot = sentinel_reboot_data.get(endpoint_name, None)
+            screenconnect_reboot = screenconnect_reboot_data.get(endpoint_name, None)
+            if sentinel_reboot is not None and screenconnect_reboot is not None:
+                row["Days Since Last Reboot"] = min(sentinel_reboot, screenconnect_reboot)
+            elif sentinel_reboot is not None:
+                row["Days Since Last Reboot"] = sentinel_reboot
+            elif screenconnect_reboot is not None:
+                row["Days Since Last Reboot"] = screenconnect_reboot
+            else:
+                row["Days Since Last Reboot"] = ''
             writer.writerow(row)
