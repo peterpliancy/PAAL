@@ -7,7 +7,10 @@ The command to run this in terminal assuming it has ran successfully in the past
 python3 /Applications/PAAL/PAAL.py
 
 
-Current Version 1.0.3
+Current Version 1.0.4
+- removed the or feature for last reboot and just reverted it back to the smalllest number of the two entries found
+
+Version 1.0.3
 - removed the newly added type column from the outputted modified file sentinelone apps csv
 - changed the success message at the end to start the process of cleaning those up
 - changed the endpoint script to compare the gist to the OSCombined column instead of the Windows one to better support mixed platform
