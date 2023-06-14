@@ -7,7 +7,10 @@ The command to run this in terminal assuming it has ran successfully in the past
 python3 /Applications/PAAL/PAAL.py
 
 
-Current Version 1.0.4
+Current Version 1.0.5
+- fixed an issue where the AzureAD file would not rename columns correctly
+
+Version 1.0.4
 - removed the or feature for last reboot and just reverted it back to the smalllest number of the two entries found
 
 Version 1.0.3
