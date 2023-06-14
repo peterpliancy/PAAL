@@ -29,20 +29,17 @@ def modify_csv_file(file_path, remote_data):
 
     df.loc[df['isCompliant'] == True, 'isCompliant'] = ''
     df.loc[df['isManaged'] == True, 'isManaged'] = ''
-
     df.loc[df['isCompliant'] == False, 'isCompliant'] = 'Not Compliant'
-
-    # Rename entries from "MacMDM" to "macOS" in the "operatingSystem" column
     df.loc[df['operatingSystem'] == 'MacMDM', 'operatingSystem'] = 'macOS'
 
     # Rename columns
-    df.rename(columns={'isCompliant': 'Compliance Status', 'joinType (trustType)': 'AD Join Type', 'isManaged': 'Managed Status'}, inplace=True)
+    df.rename(columns={'displayName': 'Endpoint Name', 'isCompliant': 'Compliance Status', 'joinType (trustType)': 'AD Join Type', 'isManaged': 'Managed Status', 'operatingSystemVersion': 'OS Version'}, inplace=True)
 
     # Rename the "operatingSystem" column to "OS"
     df.rename(columns={'operatingSystem': 'OS'}, inplace=True)
 
-    # Create a new column "OS Version OOD" and clone the values from "operatingSystemVersion"
-    df.insert(df.columns.get_loc('operatingSystemVersion') + 1, 'OS Version OOD', df['operatingSystemVersion'])
+    # Create a new column "OS Version OOD" and clone the values from "OS Version"
+    df.insert(df.columns.get_loc('OS Version') + 1, 'OS Version OOD', df['OS Version'])
 
     # Clear "OS Version OOD" if it starts with a value from the OSCombined column
     df['OS Version OOD'] = df['OS Version OOD'].astype(str)
@@ -54,8 +51,11 @@ def modify_csv_file(file_path, remote_data):
     )
 
     # Sort the displayName column alphabetically, ignoring case
-    df['displayName'] = df['displayName'].astype(str)
-    df.sort_values(by='displayName', key=lambda x: x.str.lower(), inplace=True)
+    df['Endpoint Name'] = df['Endpoint Name'].astype(str)
+    df.sort_values(by='Endpoint Name', key=lambda x: x.str.lower(), inplace=True)
+
+    # Replace "Azure AD joined" with an empty string in the "AD Join Type" column
+    df.loc[df['AD Join Type'] == 'Azure AD joined', 'AD Join Type'] = ''
 
     return df
 
@@ -96,10 +96,6 @@ def main():
 
         # Modify the modified file
         modified_df = modify_csv_file(modified_file_path, remote_data)
-
-        # Rename columns
-        modified_df.rename(columns={'isCompliant': 'Compliance Status', 'joinType (trustType)': 'AD Join Type', 'isManaged': 'Managed Status'}, inplace=True)
-        modified_df.rename(columns={'operatingSystem': 'OS', 'operatingSystemVersion': 'OS Version'}, inplace=True)
 
         # Save the modified file
         save_csv_file(modified_df, modified_file_path)
