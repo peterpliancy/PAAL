@@ -9,6 +9,7 @@ python3 /Applications/PAAL/PAAL.py
 
 Current Version 1.0.5
 - fixed an issue where the AzureAD file would not rename columns correctly
+- modifed the azuread focus point script to only look at endpoint for the results
 
 Version 1.0.4
 - removed the or feature for last reboot and just reverted it back to the smalllest number of the two entries found
