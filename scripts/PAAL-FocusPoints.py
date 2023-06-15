@@ -46,10 +46,8 @@ def process_azuread_endpoints(input_csv_path, output_csv_path):
                 endpoint_name = row['Endpoint Name']
                 azuread = row['365 AzureAD']
                 endpoint = row['365 Endpoint']
-                screenconnect = row['ScreenConnect']
-                sentinelone = row['SentinelOne']
 
-                if azuread == '✔' and endpoint == '✖' and screenconnect == '✖' and sentinelone == '✖':
+                if azuread == '✔' and endpoint == '✖':
                     writer.writerow([endpoint_name])
 
 output_csv_files = []
